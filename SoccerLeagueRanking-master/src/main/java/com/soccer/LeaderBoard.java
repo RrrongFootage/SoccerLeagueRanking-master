@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 
 public class LeaderBoard {
@@ -29,7 +31,7 @@ public class LeaderBoard {
             System.exit(0);
         } else {
             try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(resultsFile), "UTF8"));
+                BufferedReader in = new BufferedReader(new InputStreamReader(Files.newInputStream(resultsFile.toPath()), StandardCharsets.UTF_8));
                 String str;
                 while ((str = in.readLine()) != null) {
                     FixtureEngine fixtureEngine = new FixtureEngine();
@@ -39,8 +41,6 @@ public class LeaderBoard {
                         this.addTeam(team);
                     }
                 }
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -54,11 +54,21 @@ public class LeaderBoard {
 
     public void displayLeaderBoard() {
         sortTeams();
-        String pointsString = "";
+        String pointsString;
+        Map<Integer,Integer> pointsMap =new HashMap<>();
         for (int i = 0; i < teams.size(); i++) {
             Team team = teams.get(i);
+            int position;
+            Integer equalPoint=pointsMap.get(i-1);
+            if (equalPoint == null || !(team.getPoints() == equalPoint)) {
+                pointsMap.put(i, team.getPoints());
+                position=i+1;
+            }
+           else{
+                position=i;
+            }
             pointsString = team.getPoints() == 1 ? " pt" : " pts";
-            System.out.println(i + 1 + ". " + team.getName() + ", " + team.getPoints() + pointsString);
+            System.out.println(position + ". " + team.getName() + ", " + team.getPoints() + pointsString);
         }
     }
 }
